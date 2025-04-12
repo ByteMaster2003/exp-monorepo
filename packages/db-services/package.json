@@ -1,0 +1,11 @@
+{
+  "name": "db-services",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "mongoose": "^8.13.2"
+  }
+}
