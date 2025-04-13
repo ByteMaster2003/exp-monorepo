@@ -17,7 +17,7 @@ const baseRules = {
   // General rules
   "prefer-const": ["error"],
   "no-console": ["warn"],
-  "no-unused-vars": ["error"],
+  "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
   "no-unused-expressions": ["error"],
   quotes: ["error", "double"],
   camelcase: ["error", { properties: "always", allow: ["required_error", "invalid_type_error"] }],
@@ -37,7 +37,6 @@ const importRules = {
   "import/no-absolute-path": "error",
   "import/no-self-import": "error",
   "import/no-cycle": ["error", { maxDepth: 1 }],
-  "import/no-useless-path-segments": ["error", { noUselessIndex: true }],
 
   // Helpful warnings
   "import/no-deprecated": "warn",
@@ -90,7 +89,7 @@ const importRules = {
     "error",
     "ignorePackages",
     {
-      js: "never",
+      js: "always",
       mjs: "never",
       jsx: "never"
     }
