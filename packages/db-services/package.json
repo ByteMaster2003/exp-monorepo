@@ -6,6 +6,8 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "mongoose": "^8.13.2"
+    "ioredis": "^5.6.1",
+    "mongoose": "^8.13.2",
+    "winston": "^3.17.0"
   }
 }
