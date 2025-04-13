@@ -1,0 +1,13 @@
+{
+  "name": "custom-logger",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "bullmq": "^5.48.1",
+    "winston": "^3.17.0",
+    "winston-transport": "^4.9.0"
+  }
+}
