@@ -1,6 +1,6 @@
 import { createCustomLogger } from "custom-logger";
 
-import { AppConfig } from "../config/env.config.js";
+import { AppConfig } from "./env.config.js";
 import { redisClient } from "../utils/index.js";
 
 /**

@@ -5,8 +5,9 @@
   "type": "module",
   "private": true,
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "packages/*",
+    "servers/*",
+    "clients/*"
   ],
   "scripts": {
     "lint": "eslint .",
