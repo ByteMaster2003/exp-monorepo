@@ -2,27 +2,29 @@ import winston from "winston";
 
 import { RedisTransport } from "./transports.js";
 
-const enumerateErrorFormat = winston.format((info) => {
-  if (info instanceof Error) {
-    Object.assign(info, { message: info.stack });
+const logformat = winston.format.printf((info) => {
+  const logInfo = {
+    project: info.project,
+    timestamp: info.timestamp,
+    level: info.level,
+    message: info.message
+  };
+
+  if (info.stack) logInfo.stack = info.stack;
+  if (info.metadata) logInfo.metadata = info.metadata;
+  if (info.data) logInfo.data = info.data;
+
+  if (info.message instanceof Error) {
+    Object.assign(logInfo, { message: { stack: info.message.stack } });
   }
-  return info;
-});
 
-const socketLogFormat = winston.format.printf(({ timestamp, level, message, metadata, data }) => {
-  const eventType = `[==================== ${message} ====================]`;
-  let logMessage = `${timestamp} ${level}: ${eventType} ${JSON.stringify(metadata, null, 2)}\n`;
-
-  if (data) {
-    logMessage = `${logMessage}Data: ${JSON.stringify(data)}\n`;
-  }
-
-  return logMessage;
+  return JSON.stringify(logInfo);
 });
 
 /**
  * Creates customized Winston logger instances for general and socket logging
  * @param {string} NODE_ENV - Node environment ('development' or 'production')
+ * @param {string} projectName - projectName
  * @param {Object} redisClient - Redis client instance for log transport
  * @param {string} streamName - Redis stream name for general logs
  * @param {string} socketStreamName - Redis stream name for socket logs
@@ -61,12 +63,18 @@ const socketLogFormat = winston.format.printf(({ timestamp, level, message, meta
  * - Include timestamps in IST timezone
  * - Handle error objects automatically
  */
-export function createCustomLogger(NODE_ENV, redisClient, streamName, socketStreamName) {
+export function createCustomLogger(
+  NODE_ENV,
+  projectName,
+  redisClient,
+  streamName,
+  socketStreamName
+) {
   const isDevEnv = NODE_ENV === "development";
   const level = isDevEnv ? "debug" : "info";
-  const loggerTransports = [new RedisTransport({ streamName, redisClient })];
+  const loggerTransports = [new RedisTransport({ projectName, streamName, redisClient })];
   const socketLoggerTransports = [
-    new RedisTransport({ streamName: socketStreamName, redisClient })
+    new RedisTransport({ projectName, streamName: socketStreamName, redisClient })
   ];
 
   if (isDevEnv) {
@@ -84,33 +92,26 @@ export function createCustomLogger(NODE_ENV, redisClient, streamName, socketStre
     socketLoggerTransports.push(
       new winston.transports.Console({
         stderrLevels: ["error"],
-        format: winston.format.combine(winston.format.colorize(), socketLogFormat)
+        format: winston.format.colorize()
       })
     );
   }
+  const winstonLogFormat = winston.format.combine(
+    winston.format.timestamp({
+      format: () => new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+    }),
+    logformat
+  );
 
   const Logger = winston.createLogger({
     level,
-    format: winston.format.combine(
-      enumerateErrorFormat(),
-      winston.format.timestamp({
-        format: () => new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-      }),
-      winston.format.printf(({ timestamp, level, message }) => {
-        return `${timestamp} ${level}: ${message}`;
-      })
-    ),
+    format: winstonLogFormat,
     transports: loggerTransports
   });
 
   const SocketLogger = winston.createLogger({
     level,
-    format: winston.format.combine(
-      winston.format.timestamp({
-        format: () => new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-      }),
-      socketLogFormat
-    ),
+    format: winstonLogFormat,
     transports: socketLoggerTransports
   });
 
