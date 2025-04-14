@@ -27,6 +27,7 @@ const AppConfig = {
   NODE_ENV: Vars.NODE_ENV || "development",
   PORT: Vars.PORT || 8080,
   MONGO_URI: Vars.MONGO_URI,
+  PROJECT_NAME: Vars.PROJECT_NAME,
   ALLOWED_ORIGINS: Vars.ALLOWED_ORIGINS?.split(",").map((origin) => origin.trim()),
   AUTH: {
     ACCESS_TOKEN_SECRET: Vars.ACCESS_TOKEN_SECRET,
@@ -37,7 +38,8 @@ const AppConfig = {
   REDIS: {
     URL: Vars.REDIS_URL,
     LOG_STREAM: Vars.REDIS_LOGGER_STREAM,
-    SOCKET_LOG_STREAM: Vars.REDIS_SOCKET_LOG_STREAM
+    SOCKET_LOG_STREAM: Vars.REDIS_SOCKET_LOG_STREAM,
+    WORKER_BATCH_SIZE: parseInt(Vars.WORKER_BATCH_SIZE) || 100
   }
 };
 

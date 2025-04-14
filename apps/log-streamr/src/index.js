@@ -4,6 +4,8 @@ import { RdsConnectionManager } from "db-services";
 
 import app from "./app.js";
 import { AppConfig, Logger } from "./config/index.js";
+import { logWorker, consumerCleanUp } from "./services/bullmq/consumer.js";
+import { processLogStream, terminateLogProcessing } from "./services/bullmq/producer.js";
 import { initializeSocket } from "./socket/index.js";
 import { dbConnection } from "./utils/index.js";
 
@@ -12,6 +14,19 @@ let server;
 const port = AppConfig.PORT;
 /** @type {import('http').Server} - HTTP server created from Express app */
 const httpServer = createServer(app);
+
+// Start log stream processor
+processLogStream({ streamName: AppConfig.REDIS.LOG_STREAM, batchSize: 1000 }).catch((error) => {
+  Logger.error("Failed to start log stream processor:", error);
+  process.exit(1);
+});
+processLogStream({ streamName: AppConfig.REDIS.SOCKET_LOG_STREAM, batchSize: 1000 }).catch(
+  (error) => {
+    Logger.error("Failed to start socket log stream processor:", error);
+    process.exit(1);
+  }
+);
+logWorker.run();
 
 // Initialize Socket Server
 initializeSocket(httpServer);
@@ -29,11 +44,12 @@ const exitHandler = async () => {
     if (server) {
       Logger.info("Shutting down application...");
 
+      // Terminate Workers and log processing
+      await terminateLogProcessing();
+      await consumerCleanUp();
+
       // Disconnect from database
       await dbConnection.disconnect();
-
-      // Disconnect from Redis
-      await RdsConnectionManager.closeAll();
 
       // Close the server gracefully
       await new Promise((resolve, reject) => {
@@ -42,12 +58,13 @@ const exitHandler = async () => {
           else resolve();
         });
       });
-      Logger.info("Express server closed");
+
+      // Disconnect from Redis
+      await RdsConnectionManager.closeAll();
     }
 
     process.exit(0);
-  } catch (error) {
-    Logger.error(`Error during shutdown: ${error.message}`);
+  } catch {
     process.exit(1);
   }
 };
@@ -57,7 +74,10 @@ const unexpectedErrorHandler = (error) => {
   exitHandler();
 };
 
+let isSigIntCalled = false;
 process.on("SIGINT", () => {
+  if (isSigIntCalled) return;
+  isSigIntCalled = true;
   exitHandler();
 });
 process.on("uncaughtException", unexpectedErrorHandler);

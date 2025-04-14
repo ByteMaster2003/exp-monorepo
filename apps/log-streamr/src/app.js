@@ -1,7 +1,6 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
-import ExpressMongoSanitize from "express-mongo-sanitize";
 import helmet from "helmet";
 import { ApiError, httpStatus } from "shared-utils";
 
@@ -21,8 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 // parse cookies
 app.use(cookieParser());
 
-// sanitize request data
-app.use(ExpressMongoSanitize());
+// TODO implement custom sanitization logic
 
 // enable cors
 app.use(
