@@ -8,24 +8,23 @@ const logSchema = new Schema(
       type: String,
       require: true
     },
-    logType: {
-      type: String,
-      enum: ["appLog", "socketLog"],
-      default: "appLog"
+    timestamp: {
+      type: Date,
+      require: true
     },
     level: {
       type: String,
       enum: ["info", "error", "debug", "warn"],
       require: true
     },
-    timestamp: {
-      type: Date,
-      require: true
-    },
     message: {
       type: String,
       require: true
-    }
+    },
+    query: String,
+    params: String,
+    body: String,
+    stack: String
   },
   {
     timestamps: true
@@ -36,9 +35,8 @@ logSchema.plugin(toJSON);
 logSchema.plugin(paginate);
 logSchema.index({
   project: 1,
-  logType: 1,
-  level: 1,
-  timestamp: 1
+  timestamp: 1,
+  level: 1
 });
 
 export const LogsModel = model("logs", logSchema);
