@@ -16,6 +16,7 @@ import { redisClient } from "../utils/index.js";
  */
 export const { Logger, SocketLogger } = createCustomLogger(
   AppConfig.NODE_ENV,
+  AppConfig.PROJECT_NAME,
   redisClient,
   AppConfig.REDIS.LOG_STREAM,
   AppConfig.REDIS.SOCKET_LOG_STREAM

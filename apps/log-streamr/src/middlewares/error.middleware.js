@@ -28,16 +28,13 @@ const errorHandler = (err, req, res, _next) => {
   }
 
   res.locals.errorMessage = err.message;
-  const isObject = typeof err.stack === "object";
 
-  Logger.error(
-    "======================================== Error ========================================\n" +
-      `Query: ${JSON.stringify(req.query)}\n` +
-      `Params: ${JSON.stringify(req.params)}\n` +
-      `Body: ${JSON.stringify(req.body)}\n\n` +
-      `Message: ${JSON.stringify(err.message)}\n` +
-      `${isObject ? JSON.stringify(err.stack, null, 2) : err.stack}\n`
-  );
+  Logger.error({
+    query: req.query,
+    params: req.params,
+    body: req.body,
+    message: err.stack
+  });
   res.status(statusCode).send(response);
 };
 

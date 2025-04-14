@@ -36,7 +36,7 @@ startFlushTimer();
 const logWorker = new Worker(
   QUEUE_NAME,
   async (job) => {
-    buffer.push({ project: "log-streamr", ...job.data });
+    buffer.push({ ...job.data });
 
     // If buffer is full, flush early
     if (buffer.length >= BATCH_SIZE) {

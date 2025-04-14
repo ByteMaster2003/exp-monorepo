@@ -64,7 +64,10 @@ const processLogStream = async ({ streamName, batchSize = 100 }) => {
         await redisClient.xdel(streamName, messageId);
       }
     } catch (error) {
-      Logger.error(`Error processing log stream: ${error.message}`);
+      Logger.error({
+        message: "Error processing log stream",
+        stack: error.stack
+      });
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
   }

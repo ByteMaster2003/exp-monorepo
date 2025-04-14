@@ -20,7 +20,7 @@ export const initializeSocket = (server) => {
   // Connection event
   io.on("connection", (socket) => {
     const userId = socket.user.id;
-    Logger.info(`User connected: ${userId}`);
+    Logger.info({ message: `User connected: ${userId}` });
 
     // Join user's personal room
     socket.join(`user:${userId}`);
@@ -32,11 +32,14 @@ export const initializeSocket = (server) => {
     // notificationEvents(io, socket);
 
     socket.on("error", (error) => {
-      Logger.error(`Socket error: ${error.message}`);
+      Logger.error({
+        message: "Socket error",
+        stack: error.stack
+      });
     });
   });
 
-  Logger.info("Socket server initialized");
+  Logger.info({ message: "Socket server initialized" });
   return io;
 };
 

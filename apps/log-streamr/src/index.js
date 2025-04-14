@@ -17,12 +17,18 @@ const httpServer = createServer(app);
 
 // Start log stream processor
 processLogStream({ streamName: AppConfig.REDIS.LOG_STREAM, batchSize: 1000 }).catch((error) => {
-  Logger.error("Failed to start log stream processor:", error);
+  Logger.error({
+    message: "Failed to start log stream processor",
+    stack: error?.stack
+  });
   process.exit(1);
 });
 processLogStream({ streamName: AppConfig.REDIS.SOCKET_LOG_STREAM, batchSize: 1000 }).catch(
   (error) => {
-    Logger.error("Failed to start socket log stream processor:", error);
+    Logger.error({
+      message: "Failed to start socket log stream processor",
+      stack: error?.stack
+    });
     process.exit(1);
   }
 );
@@ -34,7 +40,7 @@ initializeSocket(httpServer);
 // ConnectMongoDB and start Express Server
 dbConnection.connect(AppConfig.MONGO_URI).then(() => {
   server = httpServer.listen(port, () => {
-    Logger.info(`Listening on port ${port}`);
+    Logger.info({ message: `Listening on port ${port}` });
   });
 });
 
@@ -42,7 +48,7 @@ const exitHandler = async () => {
   try {
     // Close HTTP server
     if (server) {
-      Logger.info("Shutting down application...");
+      Logger.info({ message: "Shutting down application..." });
 
       // Terminate Workers and log processing
       await terminateLogProcessing();
@@ -70,7 +76,10 @@ const exitHandler = async () => {
 };
 
 const unexpectedErrorHandler = (error) => {
-  Logger.error(`Unexpected error: ${error.message}`);
+  Logger.error({
+    message: "Unexpected error",
+    stack: error.stack
+  });
   exitHandler();
 };
 

@@ -57,7 +57,9 @@ export const authSocketSession = async (socket, next) => {
 
       // Leave users personal room on disconnect
       socket.leave(`user:${userId}`);
-      Logger.info(`User disconnected: ${socket.user.id}`);
+      Logger.info({
+        message: `User disconnected: ${socket.user.id}`
+      });
     });
     next();
   } catch (error) {
