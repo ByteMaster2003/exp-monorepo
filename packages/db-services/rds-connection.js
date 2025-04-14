@@ -71,7 +71,7 @@ class RedisConnectionManager {
     // Create new client
     const client = new IORedis(redisUrl, {
       lazyConnect: true,
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: null,
       enableReadyCheck: true,
       retryStrategy(times) {
         return Math.min(times * 50, 2000);

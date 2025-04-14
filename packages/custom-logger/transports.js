@@ -88,6 +88,7 @@ class RedisTransport extends Transport {
     super(opts);
     this.redis = opts.redisClient;
     this.streamName = opts.streamName;
+    this.projectName = opts.projectName;
     this.pendingLogs = [];
     this.isConnected = true;
 
@@ -119,16 +120,27 @@ class RedisTransport extends Transport {
         return callback();
       }
 
-      await this.redis.xadd(
+      const args = [
         this.streamName,
-        "*", // Auto-generate message ID
+        "*",
+        "project",
+        this.projectName,
         "timestamp",
         info.timestamp,
         "level",
         info.level,
         "message",
         info.message
-      );
+      ];
+
+      if (info.query) args.push("query", info.query);
+      if (info.params) args.push("params", info.params);
+      if (info.body) args.push("body", info.body);
+      if (info.stack) args.push("stack", info.stack);
+      if (info.metadata) args.push("metadata", info.metadata);
+      if (info.data) args.push("data", info.data);
+
+      await this.redis.xadd(...args);
       callback();
     } catch {
       // Store failed logs in memory
