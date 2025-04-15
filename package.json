@@ -10,6 +10,17 @@
     "clients/*"
   ],
   "scripts": {
+    "w:cd:a": "yarn workspace control-deck add",
+    "w:cd:r": "yarn workspace control-deck remove",
+    "w:cd:dev": "yarn workspace control-deck run dev",
+    "w:cl:a": "yarn workspace custom-logger add",
+    "w:cl:r": "yarn workspace custom-logger remove",
+    "w:dbs:a": "yarn workspace db-services add",
+    "w:dbs:r": "yarn workspace db-services remove",
+    "w:sdu:a": "yarn workspace shared-utils add",
+    "w:sdu:r": "yarn workspace shared-utils remove",
+    "w:ui:a": "yarn workspace ui add",
+    "w:ui:r": "yarn workspace ui remove",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
