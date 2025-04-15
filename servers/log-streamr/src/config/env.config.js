@@ -1,7 +1,7 @@
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
-import dotenv from "dotenv";
+import { loadEnvs } from "shared-utils";
 import { ZodError } from "zod";
 
 import { envSchema } from "../validations/env.validation.js";
@@ -9,8 +9,10 @@ import { envSchema } from "../validations/env.validation.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const envFilePath = join(__dirname, "./../../.env");
-dotenv.config({ path: envFilePath });
+const rootEnvPath = join(__dirname, "./../../../../.shared.env");
+const localEnvPath = join(__dirname, "./../../.env");
+const combinedEnv = loadEnvs(rootEnvPath, localEnvPath);
+Object.assign(process.env, combinedEnv);
 
 let Vars = null;
 try {

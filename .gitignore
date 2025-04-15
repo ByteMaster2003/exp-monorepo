@@ -13,4 +13,5 @@ build
 
 .cache
 .DS_Store
-.env
+.env*
+.shared.env
