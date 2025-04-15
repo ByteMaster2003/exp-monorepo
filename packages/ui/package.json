@@ -1,0 +1,12 @@
+{
+  "name": "ui",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@mui/material": "^7.0.2",
+    "axios": "^1.8.4",
+    "react": "^19.1.0"
+  }
+}
