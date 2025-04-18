@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { RoleProtectedRoutes, Unauthorized, NotFound } from "ui/components/index.jsx";
+import { NotFound, RoleProtectedRoutes, Unauthorized } from "ui/components";
 
 import { Admin } from "./pages/admin.jsx";
 import { Home } from "./pages/home.jsx";
