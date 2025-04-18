@@ -9,6 +9,9 @@
     "servers/*",
     "clients/*"
   ],
+  "exports": {
+    "./component": "./packages/ui/components/index.jsx"
+  },
   "scripts": {
     "w:cd:a": "yarn workspace control-deck add",
     "w:cd:r": "yarn workspace control-deck remove",
@@ -73,6 +76,7 @@
     "globals": "^16.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
+    "nodemon": "^3.1.9",
     "prettier": "^3.5.3"
   }
 }
