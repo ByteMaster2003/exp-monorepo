@@ -5,6 +5,13 @@
   "license": "MIT",
   "type": "module",
   "private": true,
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    }
+  },
   "dependencies": {
     "ioredis": "^5.6.1",
     "mongoose": "^8.13.2",
