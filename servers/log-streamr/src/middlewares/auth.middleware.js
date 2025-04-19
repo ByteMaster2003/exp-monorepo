@@ -6,7 +6,7 @@ export const authMiddleware = catchAsync(async (req, _, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "") || req.cookies.accessToken;
 
   if (!token) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
+    throw new ApiError(httpStatus.UNAUTHORIZED, httpStatus[httpStatus.UNAUTHORIZED]);
   }
 
   const payload = await tokenUtil.verifyAccessToken(token);

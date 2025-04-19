@@ -28,7 +28,7 @@ const baseRules = {
 
 const importRules = {
   // Critical: Prevent incorrect imports
-  "import/no-unresolved": ["error", { ignore: ["^(ui)/"] }],
+  "import/no-unresolved": ["error", { ignore: ["^(ui|shared-utils)/"] }],
   "import/no-commonjs": "error",
   "import/no-duplicates": "error",
   "import/named": "error",
