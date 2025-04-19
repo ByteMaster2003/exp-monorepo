@@ -1,7 +1,10 @@
-import { RateLimitRequestHandler } from "express-rate-limit";
+/// <reference path="./middlewares/index.d.ts" />
 
-declare namespace e {
-  const hashUtil: {
+declare module "shared-utils" {
+  import { RateLimitRequestHandler } from "express-rate-limit";
+  import { HttpStatus } from "http-status";
+
+  export const hashUtil: {
     /**
      * Generates an MD5 hash from the input string
      * @param {string} inputString - The string to be hashed
@@ -50,7 +53,7 @@ declare namespace e {
     redisClient: any; // Redis client type
   }
 
-  class TokenUtil {
+  export class TokenUtil {
     constructor(config: TokenConfig);
     signAccessToken(userId: string, payload?: object): Promise<string>;
     signRefreshToken(userId: string, payload?: object): Promise<string>;
@@ -59,12 +62,12 @@ declare namespace e {
   }
 
   // Rate Limiter Types
-  interface RateLimitConfig {
+  export interface RateLimitConfig {
     windowMs: number;
     max: number;
   }
 
-  class RateLimiter {
+  export class RateLimiter {
     constructor(nodeEnv?: string);
     create(config?: RateLimitConfig): RateLimitRequestHandler;
     threePerHour(): RateLimitRequestHandler;
@@ -76,17 +79,17 @@ declare namespace e {
   }
 
   // Environment Utility Types
-  function loadEnvs(rootEnvPath: string, localEnvPath: string): Record<string, string>;
+  export function loadEnvs(rootEnvPath: string, localEnvPath: string): Record<string, string>;
 
   // Encryption Utility Types
-  class EncryptionUtil {
+  export class EncryptionUtil {
     constructor(encryptionKey: string, encryptionIv: string);
     encrypt(plainText: string): string;
     decrypt(encryptedHex: string): string;
   }
 
   // API Error Types
-  class ApiError extends Error {
+  export class ApiError extends Error {
     constructor(statusCode: number, message: string, stack?: string);
     statusCode: number;
   }
@@ -98,10 +101,8 @@ declare namespace e {
     next: import("express").NextFunction
   ) => Promise<any>;
 
-  function catchAsync(fn: AsyncRequestHandler): import("express").RequestHandler;
+  export function catchAsync(fn: AsyncRequestHandler): import("express").RequestHandler;
+  export const httpStatus: HttpStatus;
 
-  // HTTP Status Constants
-  const httpStatus: { [key: string]: number };
+  export * from "shared-utils/middlewares";
 }
-
-export = e;

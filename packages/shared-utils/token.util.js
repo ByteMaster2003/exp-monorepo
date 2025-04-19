@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
+import { httpStatus } from "shared-utils";
 
 import { ApiError } from "./api-error.util.js";
-import { httpStatus } from "./constants/http-status.js";
 import hashUtil from "./hash.util.js";
 
 /**
@@ -126,7 +126,7 @@ export class TokenUtil {
       const cachedToken = await this.redis.get(cacheKey);
 
       if (accessToken !== cachedToken) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, "Access token expired or invalid");
+        throw new ApiError(httpStatus.UNAUTHORIZED, httpStatus[httpStatus.UNAUTHORIZED]);
       }
 
       return payload;
@@ -153,7 +153,7 @@ export class TokenUtil {
       const cachedToken = await this.redis.get(cacheKey);
 
       if (refreshToken !== cachedToken) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, "Refresh token expired or invalid");
+        throw new ApiError(httpStatus.UNAUTHORIZED, httpStatus[httpStatus.UNAUTHORIZED]);
       }
 
       return payload;
