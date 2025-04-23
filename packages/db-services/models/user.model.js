@@ -29,8 +29,14 @@ const userSchema = new Schema(
       default: "User"
     },
     picture: String,
-    authProviders: [],
-    apps: []
+    authProviders: {
+      type: [String],
+      default: []
+    },
+    apps: {
+      type: [String],
+      default: []
+    }
   },
   { timestamps: true }
 );

@@ -79,17 +79,21 @@ const googleCallback = async (req, res) => {
         email: userInfo.data.email,
         picture: userInfo.data.picture,
         isEmailVerified: userInfo.data.email_verified,
-        authProviders: ["google"]
+        authProviders: ["google"],
+        apps: [stateData.app]
       });
     } else {
       if (!user.authProviders.includes("google")) {
-        user = await UserModel.updateOne(
+        user = await UserModel.findOneAndUpdate(
           { email: user.email },
           { $push: { authProviders: "google" } }
         );
       }
       if (!user.apps.includes(stateData.app)) {
-        user = await UserModel.updateOne({ email: user.email }, { $push: { apps: stateData.app } });
+        user = await UserModel.findOneAndUpdate(
+          { email: user.email },
+          { $push: { apps: stateData.app } }
+        );
       }
     }
 

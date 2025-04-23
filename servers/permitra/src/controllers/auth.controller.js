@@ -8,19 +8,25 @@ import { tokenUtil, redisClient } from "../utils/index.js";
 const register = catchAsync(async (req, res) => {
   const { app, state, name, email, password } = req.body;
 
-  const existingUser = await UserModel.findOne({ email });
-  if (existingUser) {
+  let user = await UserModel.findOne({ email });
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  if (!user) {
+    user = await UserModel.create({
+      name,
+      email,
+      password: hashedPassword,
+      authProviders: ["permitra"],
+      apps: [app]
+    });
+  } else if (!user?.authProviders.includes("permitra") && !user.password) {
+    user.password = hashedPassword;
+    user.authProviders = ["permitra", ...user?.authProviders];
+    user.save();
+  } else {
     throw new ApiError(httpStatus.CONFLICT, "User already exists, please login!");
   }
 
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  const newUser = await UserModel.create({
-    name,
-    email,
-    password: hashedPassword
-  });
-
-  const authCode = await authService.generateAuthCode(newUser._id.toString(), app);
+  const authCode = await authService.generateAuthCode(user._id.toString(), app);
   return res.status(httpStatus.OK).json({
     success: true,
     code: authCode,
