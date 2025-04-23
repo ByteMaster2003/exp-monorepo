@@ -4,6 +4,7 @@ declare module "ui/components" {
 	interface LoaderComponentProps {}
 	interface UnauthorizedProps {}
 	interface NotFoundProps {}
+	interface BadRequestProps { message: string }
 	interface RoleProtectedRoutesProps {
 		allowedRoles?: string[];
 	}
@@ -11,6 +12,6 @@ declare module "ui/components" {
 	const LoaderComponent: FC<LoaderComponentProps>;
 	const Unauthorized: FC<UnauthorizedProps>;
 	const NotFound: FC<NotFoundProps>;
+	const BadRequest: FC<BadRequestProps>;
 	const RoleProtectedRoutes: FC<RoleProtectedRoutesProps>;
-
 }

@@ -1,8 +1,8 @@
 import axios from "axios";
 
-export const POST = async (path, payload, headers = { "Content-Type": "application/json" }) => {
+export const POST = async (uri, payload, headers = { "Content-Type": "application/json" }) => {
   return axios
-    .post(path, payload, { withCredentials: true, headers })
+    .post(uri, payload, { withCredentials: true, headers })
     .then((response) => {
       return response.data;
     })
@@ -11,9 +11,9 @@ export const POST = async (path, payload, headers = { "Content-Type": "applicati
     });
 };
 
-export const GET = async (path, headers = { "Content-Type": "application/json" }) => {
+export const GET = async (uri, headers = { "Content-Type": "application/json" }) => {
   return axios
-    .get(path, { withCredentials: true, headers })
+    .get(uri, { withCredentials: true, headers })
     .then((response) => {
       return response.data;
     })

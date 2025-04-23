@@ -1,16 +1,14 @@
 import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "ui/hooks";
 
-import { useAuth } from "../hooks/index.js";
-
-export const RoleProtectedRoutes = ({ allowedRoles = ["User"] }) => {
+export const RoleProtectedRoutes = ({ allowedRoles }) => {
   const { user, isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
-    window.location.href = "https://example.com/help";
-    return;
+    return <Navigate to="/login" replace />;
   }
 
-  if (!allowedRoles.includes(user.role)) {
+  if (allowedRoles && !allowedRoles.split(",").includes(user?.role)) {
     return <Navigate to="/unauthorized" replace />;
   }
 

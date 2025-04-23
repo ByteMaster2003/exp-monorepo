@@ -1,9 +1,27 @@
-import loader from "../assets/loader.svg";
+import { Box } from "@mui/material";
+
+import loader from "../assets/bouncing-circles.svg";
 
 export const LoaderComponent = () => {
   return (
-    <div className="h-screen flex justify-center items-center bg-[#171717]">
-      <img src={loader} alt="loader" className="size-32 translate-y-[-200px]" />
-    </div>
+    <Box
+      sx={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.5rem",
+        alignItems: "center",
+        paddingTop: "10rem"
+      }}
+    >
+      <Box
+        component="img"
+        sx={{
+          height: { xs: "7rem", sm: "10rem" }
+        }}
+        src={loader}
+        alt="loading.."
+      />
+    </Box>
   );
 };

@@ -20,7 +20,7 @@
     },
     "./hooks": {
       "types": "./hooks/index.d.ts",
-      "import": "./hooks/index.jsx"
+      "import": "./hooks/index.js"
     },
     "./providers": {
       "types": "./providers/index.d.ts",
@@ -28,7 +28,7 @@
     },
     "./utils": {
       "types": "./utils/index.d.ts",
-      "import": "./utils/index.jsx"
+      "import": "./utils/index.js"
     }
   },
   "dependencies": {
