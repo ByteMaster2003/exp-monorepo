@@ -94,7 +94,7 @@ const googleCallback = async (req, res) => {
     }
 
     const authCode = await authService.signTokenAndGenerateAuthCode(user, stateData.app);
-    res.redirect(`${clientRedirects["control-deck"]}?code=${authCode}&state=${stateData.nonce}`);
+    res.redirect(`${clientRedirects[stateData.app]}?code=${authCode}&state=${stateData.nonce}`);
   } catch (error) {
     Logger.error(`GET /google/authorize: ${error.stack}`);
     res.redirect(`${permitra_error_redirect}?error=${error.message}`);

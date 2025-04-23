@@ -10,7 +10,7 @@ const router = Router({
 });
 
 router
-  .route("/register")
+  .route("/sign-up")
   .post(
     rateLimiter.threePerHour(),
     validate(authValidation.registerSchema),
@@ -18,11 +18,11 @@ router
   );
 
 router
-  .route("/login")
+  .route("/sign-in")
   .post(rateLimiter.threePerHour(), validate(authValidation.loginSchema), authController.login);
 
 router
-  .route("/logout")
+  .route("/sign-out")
   .post(
     rateLimiter.threePerHour(),
     verifyAccess,

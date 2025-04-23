@@ -9,6 +9,8 @@ const registerSchema = {
   query: z.object({}),
   params: z.object({}),
   body: z.object({
+    app: z.enum(["control-deck", "restify"]),
+    state: z.string().nanoid("Invalid State!"),
     name: z.string(),
     email: z.string().email("Invalid email!"),
     password: passwordSchema
@@ -19,8 +21,10 @@ const loginSchema = {
   query: z.object({}),
   params: z.object({}),
   body: z.object({
+    app: z.enum(["control-deck", "restify"]),
+    state: z.string().nanoid("Invalid State!"),
     email: z.string().email("Invalid Email!"),
-    password: z.string()
+    password: z.string().min(8, "Invlid Password!")
   })
 };
 
