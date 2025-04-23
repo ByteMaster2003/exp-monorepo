@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     const refreshTokens = async () => {
       const refreshResponse = await POST(config.VITE_PERMITRA_REFRESH_URI, {});
 
-      if (!refreshResponse.success) {
+      if (!refreshResponse?.success) {
         window.location.href = config.VITE_LOGIN_ENDPOINT;
       }
       return refreshResponse;
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
       const response = await getUserInfo();
 
       // Refresh tokens if invalid
-      if (!response.success && response.message === "Invalid access token") {
+      if (!response.success) {
         const { accessToken: newAccessToken, user } = await refreshTokens();
 
         setAccessToken(newAccessToken);
