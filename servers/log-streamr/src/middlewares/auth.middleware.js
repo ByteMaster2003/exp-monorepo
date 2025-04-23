@@ -1,5 +1,6 @@
 import { ApiError, catchAsync, httpStatus } from "shared-utils";
 
+import { Logger } from "../config/index.js";
 import { tokenUtil, redisClient } from "../utils/index.js";
 
 export const authMiddleware = catchAsync(async (req, _, next) => {
@@ -27,7 +28,7 @@ export const authSocketSession = async (socket, next) => {
 
   // Verify the sessionToken
   try {
-    const payload = await tokenService.verifySessionToken(sessionToken);
+    const payload = await tokenUtil.verifySessionToken(sessionToken);
     if (!payload) {
       return next(new Error("Authentication error: Invalid token"));
     }
