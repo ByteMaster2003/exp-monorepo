@@ -1,34 +1,30 @@
 import { nanoid } from "nanoid";
 
-import { redisClient, tokenUtil, encryptionUtil } from "../utils/index.js";
+import { redisClient, tokenUtil } from "../utils/index.js";
 
-const signTokenAndGenerateAuthCode = async (user, app, refresh = false) => {
-  // Sign access and refresh tokens
+const signAccessAndRefreshTokens = async (user, app) => {
   const userId = String(user._id);
-  const accessTokenPayload = {
+  const keys = { userId, app };
+
+  const userData = {
     id: userId,
-    app,
+    keys,
     email: user.email,
     phoneNumber: user.phoneNumber,
     role: user.role,
     picture: user.picture
   };
-  const encryptedPayload = encryptionUtil.encrypt(JSON.stringify(accessTokenPayload));
-  const accessToken = await tokenUtil.signAccessToken(userId, { data: encryptedPayload });
+  const accessToken = await tokenUtil.signAccessToken(keys, userData);
+  const refreshToken = await tokenUtil.signRefreshToken(keys, { id: userId, keys });
 
-  const refreshEncryptedPayload = encryptionUtil.encrypt(JSON.stringify({ id: userId, app }));
-  const refreshToken = await tokenUtil.signRefreshToken(userId, {
-    data: refreshEncryptedPayload
-  });
+  return { accessToken, refreshToken, userData };
+};
 
-  if (refresh) {
-    return { accessToken, refreshToken, accessTokenPayload };
-  }
-
+const generateAuthCode = async (userId, app) => {
   const authCode = nanoid(32);
-  await redisClient.setex(`auth_code:${authCode}`, 60, JSON.stringify({ id: userId, app }));
+  await redisClient.setex(`auth_code:${app}:${authCode}`, 60, JSON.stringify({ id: userId, app }));
 
   return authCode;
 };
 
-export default { signTokenAndGenerateAuthCode };
+export default { signAccessAndRefreshTokens, generateAuthCode };

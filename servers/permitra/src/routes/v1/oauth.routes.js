@@ -2,7 +2,7 @@ import { Router } from "express";
 import { validate } from "shared-utils/middlewares";
 
 import oauthController from "../../controllers/oauth.controller.js";
-import { rateLimiter, verifyAccess } from "../../middlewares/index.js";
+import { rateLimiter } from "../../middlewares/index.js";
 import authValidation from "../../validations/auth.validation.js";
 
 const router = Router({
@@ -27,14 +27,7 @@ router
   );
 router.route("/github/callback").get(rateLimiter.threePerHour(), oauthController.githubCallback);
 
-router
-  .route("/userinfo")
-  .get(
-    rateLimiter.fivePerMinute(),
-    verifyAccess,
-    validate(authValidation.getUserInfoSchema),
-    oauthController.getUserInfo
-  );
+router.route("/userinfo").get(rateLimiter.fivePerMinute(), oauthController.getUserInfo);
 router
   .route("/token")
   .post(

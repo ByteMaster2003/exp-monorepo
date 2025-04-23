@@ -6,7 +6,7 @@ import { ApiError, catchAsync, httpStatus } from "shared-utils";
 
 import { AppConfig, Logger } from "../config/index.js";
 import authService from "../services/auth.service.js";
-import { tokenUtil, redisClient, encryptionUtil } from "../utils/index.js";
+import { tokenUtil, redisClient } from "../utils/index.js";
 
 const clientRedirects = {
   "control-deck": AppConfig.AUTH.CONTROL_DECK_AUTH_URI,
@@ -93,7 +93,7 @@ const googleCallback = async (req, res) => {
       }
     }
 
-    const authCode = await authService.signTokenAndGenerateAuthCode(user, stateData.app);
+    const authCode = await authService.generateAuthCode(user._id.toString(), stateData.app);
     res.redirect(`${clientRedirects[stateData.app]}?code=${authCode}&state=${stateData.nonce}`);
   } catch (error) {
     Logger.error(`GET /google/authorize: ${error.stack}`);
@@ -107,7 +107,7 @@ const githubCallback = catchAsync(async (_req, _res) => {});
 const exchangeTokenWithCode = catchAsync(async (req, res) => {
   const { app, code } = req.body;
 
-  const state = await redisClient.get(`auth_code:${code}`);
+  const state = await redisClient.get(`auth_code:${app}:${code}`);
   if (!state) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Invalid or expired code!");
   }
@@ -116,37 +116,45 @@ const exchangeTokenWithCode = catchAsync(async (req, res) => {
   await redisClient.del(`auth_code:${code}`);
   const stateData = JSON.parse(state);
 
-  // Validate app and redirect
-  if (app !== stateData.app) throw new ApiError(httpStatus.BAD_REQUEST, "App mismatch!");
+  const user = await UserModel.findById(stateData.id);
 
-  // Get access and refresh tokens
-  const accessToken = await redisClient.get(tokenUtil._getCacheKey("access", stateData.id));
-  const refreshToken = await redisClient.get(tokenUtil._getCacheKey("refresh", stateData.id));
+  // Sign new pair of tokens
+  const {
+    accessToken,
+    refreshToken: newRefreshToken,
+    userData
+  } = await authService.signAccessAndRefreshTokens(user, app);
 
-  res.cookie("refreshToken", refreshToken, {
+  res.cookie("accessToken", accessToken, {
     httpOnly: true,
     path: "/",
     secure: true,
     sameSite: "None",
-    maxAge: AppConfig.AUTH.REFRESH_TOKEN_EXPIRY
+    maxAge: AppConfig.AUTH.ACCESS_TOKEN_EXPIRY * 1000
+  });
+  res.cookie("refreshToken", newRefreshToken, {
+    httpOnly: true,
+    path: "/",
+    secure: true,
+    sameSite: "None",
+    maxAge: AppConfig.AUTH.REFRESH_TOKEN_EXPIRY * 1000
   });
 
   return res.status(httpStatus.OK).json({
     success: true,
     accessToken,
-    refreshToken
+    user: userData
   });
 });
 
 const getUserInfo = catchAsync(async (req, res) => {
-  const accessToken = req.cookies.accessToken || req.headers?.authorization?.replace("Bearer ", "");
+  const accessToken = req.cookies.accessToken;
 
-  if (!accessToken) throw new ApiError(httpStatus.BAD_REQUEST, "Access token not found!");
+  if (!accessToken) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid access token");
+  }
 
-  const payload = await tokenUtil.verifyAccessToken(accessToken);
-  const jsonString = encryptionUtil.decrypt(payload.data);
-  const userData = JSON.parse(jsonString);
-
+  const userData = await tokenUtil.verifyAccessToken(accessToken);
   return res.status(httpStatus.OK).json({
     success: true,
     user: userData
@@ -161,33 +169,37 @@ const refreshTokens = catchAsync(async (req, res) => {
   }
 
   // Verify refresh token
-  const payload = await tokenUtil.verifyRefreshToken(refreshToken);
-  const jsonString = encryptionUtil.decrypt(payload.data);
-  const { id, app } = JSON.parse(jsonString);
+  const { keys } = await tokenUtil.verifyRefreshToken(refreshToken);
 
   // Get user data
-  const user = await UserModel.findById(id);
+  const user = await UserModel.findById(keys?.userId);
 
   // Sign new pair of tokens
   const {
     accessToken,
     refreshToken: newRefreshToken,
-    accessTokenPayload
-  } = await authService.signTokenAndGenerateAuthCode(user, app, true);
+    userData
+  } = await authService.signAccessAndRefreshTokens(user, keys?.app);
 
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    path: "/",
+    secure: true,
+    sameSite: "None",
+    maxAge: AppConfig.AUTH.ACCESS_TOKEN_EXPIRY * 1000
+  });
   res.cookie("refreshToken", newRefreshToken, {
     httpOnly: true,
     path: "/",
     secure: true,
     sameSite: "None",
-    maxAge: AppConfig.AUTH.REFRESH_TOKEN_EXPIRY
+    maxAge: AppConfig.AUTH.REFRESH_TOKEN_EXPIRY * 1000
   });
 
   return res.status(httpStatus.OK).json({
     success: true,
     accessToken,
-    refreshToken: newRefreshToken,
-    user: accessTokenPayload
+    user: userData
   });
 });
 

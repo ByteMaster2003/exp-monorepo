@@ -20,7 +20,7 @@ const register = catchAsync(async (req, res) => {
     password: hashedPassword
   });
 
-  const authCode = await authService.signTokenAndGenerateAuthCode(newUser, app);
+  const authCode = await authService.generateAuthCode(newUser._id.toString(), app);
   return res.status(httpStatus.OK).json({
     success: true,
     code: authCode,
@@ -45,7 +45,7 @@ const login = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.UNAUTHORIZED, "Wrong credentials!");
   }
 
-  const authCode = await authService.signTokenAndGenerateAuthCode(user, app);
+  const authCode = await authService.generateAuthCode(user._id.toString(), app);
   return res.status(httpStatus.OK).json({
     success: true,
     code: authCode,
@@ -55,7 +55,7 @@ const login = catchAsync(async (req, res) => {
 });
 
 const logout = catchAsync(async (req, res) => {
-  const { id: userId } = req.user;
+  const { id: userId, app } = req.user;
 
   const user = await UserModel.findById(userId);
   if (!user) {
@@ -63,8 +63,8 @@ const logout = catchAsync(async (req, res) => {
   }
 
   // Delete access and refresh token from db;
-  const accessCacheKey = tokenUtil._getCacheKey("access", userId);
-  const refreshCacheKey = tokenUtil._getCacheKey("refresh", userId);
+  const accessCacheKey = tokenUtil._getCacheKey("access", { userId, app });
+  const refreshCacheKey = tokenUtil._getCacheKey("refresh", { userId, app });
   await redisClient.del(accessCacheKey, refreshCacheKey);
   res.clearCookie("refreshToken");
 
