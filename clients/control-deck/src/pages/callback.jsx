@@ -6,7 +6,7 @@ import { useAuth } from "ui/hooks";
 import { POST } from "ui/utils";
 
 export const AuthCallback = () => {
-  const { setAccessToken, setIsAuthenticated } = useAuth();
+  const { setUser, setAccessToken, setIsAuthenticated } = useAuth();
   const [searchParams] = useSearchParams();
   const [isError, setIsError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,13 +38,14 @@ export const AuthCallback = () => {
       }
       setAccessToken(response.accessToken);
       setIsAuthenticated(true);
+      setUser(response?.user);
 
       setIsError(null);
       setIsLoading(false);
     };
 
     getAndSaveTokens();
-  }, [searchParams, setAccessToken, setIsAuthenticated]);
+  }, [searchParams, setAccessToken, setIsAuthenticated, setUser]);
 
   if (!isLoading && !isError) return <Navigate to="/admin" replace />;
 
