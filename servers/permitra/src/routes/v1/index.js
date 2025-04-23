@@ -1,11 +1,13 @@
 import { Router } from "express";
 
+import authRoutes from "./auth.routes.js";
+import oauthRoutes from "./oauth.routes.js";
+
 const router = Router({
   mergeParams: true
 });
 
-router.get("/test", (_req, res) => {
-  return res.status(200).json({ success: true, message: "Test request successful!" });
-});
+router.use("/auth", authRoutes);
+router.use("/oauth", oauthRoutes);
 
 export default router;

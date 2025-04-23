@@ -46,6 +46,7 @@ const unexpectedErrorHandler = (error) => {
     message: "Unexpected error",
     stack: error.stack
   });
+  console.log(error.stack);
   exitHandler();
 };
 

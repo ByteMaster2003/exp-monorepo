@@ -1,75 +1,16 @@
 import { ApiError, catchAsync, httpStatus } from "shared-utils";
 
-import { tokenUtil, redisClient, encryptionUtil } from "../utils/index.js";
+import { tokenUtil, encryptionUtil } from "../utils/index.js";
 
-export const verifyAccess = catchAsync(async (req, _, next) => {
+export const verifyAccess = catchAsync(async (req, _res, next) => {
   const accessToken = req.cookies.accessToken || req.headers?.authorization?.replace("Bearer ", "");
-  const refreshToken = req.cookies.refreshToken || req.headers["x-refresh-token"];
 
-  if (!accessToken && !refreshToken) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, httpStatus[httpStatus.UNAUTHORIZED]);
-  }
-  if (accessToken) {
-    const payload = await tokenUtil.verifyAccessToken(accessToken);
-    const jsonString = encryptionUtil.decrypt(payload.data);
-    const jsonObject = JSON.parse(jsonString);
+  if (!accessToken) throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid access token");
 
-    req.user = jsonObject;
-    next();
-  }
+  const payload = await tokenUtil.verifyAccessToken(accessToken);
+  const jsonString = encryptionUtil.decrypt(payload.data);
+  const jsonObject = JSON.parse(jsonString);
 
-  throw new ApiError(httpStatus.UNAUTHORIZED, httpStatus[httpStatus.UNAUTHORIZED]);
+  req.user = jsonObject;
+  next();
 });
-
-export const authSocketSession = async (socket, next) => {
-  // Check sessionToken in query params, headers, and auth (priority order)
-  const sessionToken =
-    socket.handshake.query?.token || // Check query params
-    socket.handshake.headers?.token || // Check headers
-    socket.handshake.auth?.token; // Check auth object
-
-  if (!sessionToken) {
-    return next(new Error("Authentication error"));
-  }
-
-  // Verify the sessionToken
-  try {
-    const payload = await tokenService.verifySessionToken(sessionToken);
-    if (!payload) {
-      return next(new Error("Authentication error: Invalid token"));
-    }
-
-    const userId = payload.id;
-    const userSocketKey = `socket:user:${userId}`;
-
-    // Use Redis SETNX (SET if Not eXists) with expiry
-    const lockAcquired = await redisClient.set(userSocketKey, socket.id, "EX", 30, "NX");
-
-    if (!lockAcquired) {
-      return next(new Error("User already connected from another device"));
-    }
-
-    // Store user data
-    socket.user = payload;
-
-    // Setup periodic refresh of the lock
-    const refreshInterval = setInterval(async () => {
-      await redisClient.expire(userSocketKey, 30);
-    }, 20000); // Refresh every 20 seconds
-
-    socket.on("disconnect", async () => {
-      // Clear interval on disconnect
-      clearInterval(refreshInterval);
-      await redisClient.del(userSocketKey);
-
-      // Leave users personal room on disconnect
-      socket.leave(`user:${userId}`);
-      Logger.info({
-        message: `User disconnected: ${socket.user.id}`
-      });
-    });
-    next();
-  } catch (error) {
-    return next(error);
-  }
-};

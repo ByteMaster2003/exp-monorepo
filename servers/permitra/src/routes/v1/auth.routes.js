@@ -3,7 +3,7 @@ import { validate } from "shared-utils/middlewares";
 
 import authController from "../../controllers/auth.controller.js";
 import authValidation from "../../validations/auth.validation.js";
-import { rateLimiter } from "./../../middlewares/index.js";
+import { rateLimiter, verifyAccess } from "./../../middlewares/index.js";
 
 const router = Router({
   mergeParams: true
@@ -23,7 +23,12 @@ router
 
 router
   .route("/logout")
-  .post(rateLimiter.threePerHour(), validate(authValidation.logoutSchema), authController.logout);
+  .post(
+    rateLimiter.threePerHour(),
+    verifyAccess,
+    validate(authValidation.logoutSchema),
+    authController.logout
+  );
 
 router
   .route("/reset-password/request")
