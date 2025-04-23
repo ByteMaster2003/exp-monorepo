@@ -52,13 +52,23 @@ declare module "shared-utils" {
     };
     issuer: string;
     redisClient: any; // Redis client type
+    encryptionUtil: any; // encryptionUtil class object
   }
 
   export class TokenUtil {
     constructor(config: TokenConfig);
-    _getCacheKey(type: "access" | "refresh", userId: string): string;
-    signAccessToken(userId: string, payload?: object): Promise<string>;
-    signRefreshToken(userId: string, payload?: object): Promise<string>;
+    _getCacheKey(
+      type: "access" | "refresh",
+      options: { userId: string; [key: string]: string }
+    ): string;
+    signAccessToken(
+      keys: { userId: string; [key: string]: string },
+      payload?: object
+    ): Promise<string>;
+    signRefreshToken(
+      keys: { userId: string; [key: string]: string },
+      payload?: object
+    ): Promise<string>;
     verifyAccessToken(accessToken: string): Promise<any>;
     verifyRefreshToken(refreshToken: string): Promise<any>;
   }
@@ -111,7 +121,7 @@ declare module "shared-utils" {
   export function validatePayloadWithSchema(
     schema: ZodSchema,
     data: object
-  ): Object<{ data: object, error: string }>;
+  ): { data?: object; error?: string };
 
   // Encryption Utility Types
   export class EncryptionUtil {

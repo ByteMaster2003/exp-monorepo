@@ -16,6 +16,7 @@ import hashUtil from "./hash.util.js";
  * @property {string} refresh.cacheKey - Cache key template for refresh tokens
  * @property {string} issuer - Token issuer name
  * @property {Object} redisClient - Redis client instance for caching
+ * @property {import("./encryption.util.js").EncryptionUtil} encryptionUtil - instance of encryption util
  */
 
 export class TokenUtil {
@@ -42,20 +43,27 @@ export class TokenUtil {
   constructor(config) {
     this.config = config;
     this.redis = config.redisClient;
+    this.encryptionUtil = config.encryptionUtil;
   }
 
   /**
    * Generates cache key for given token type and userId
    * @private
    */
-  _getCacheKey(type, userId) {
-    const cacheKey = this.config[type].cacheKey.replace("{userId}", userId);
+  _getCacheKey(type, options = {}) {
+    /**@type {string} */
+    let cacheKey = this.config[type].cacheKey || "";
+
+    Object.keys(options).forEach((key) => {
+      cacheKey = cacheKey.replace(`{${key}}`, options[key]);
+    });
+
     return hashUtil.generateSHA256Hash(cacheKey);
   }
 
   /**
    * Signs an access token for a given user.
-   * @param {string} userId - The user's unique identifier
+   * @param {Object} keys - ids which used to generate keys
    * @param {Object} [payload={}] - Additional claims to include in the token
    * @returns {Promise<string>} A promise that resolves with the signed access token
    *
@@ -64,19 +72,20 @@ export class TokenUtil {
    * The token includes:
    * - expiresIn: from configuration
    * - issuer: from configuration
-   * - audience: userId
+   * - audience: keys.userId
    */
-  async signAccessToken(userId, payload = {}) {
+  async signAccessToken(keys = {}, payload = {}) {
     const options = {
       expiresIn: this.config.access.expiryInSeconds,
       issuer: this.config.issuer,
-      audience: userId
+      audience: keys?.userId
     };
 
-    const token = jwt.sign(payload, this.config.access.secret, options);
+    const encryptedPayload = this.encryptionUtil.encrypt(JSON.stringify(payload));
+    const token = jwt.sign({ data: encryptedPayload }, this.config.access.secret, options);
 
     // Cache the token
-    const cacheKey = this._getCacheKey("access", userId);
+    const cacheKey = this._getCacheKey("access", keys);
     await this.redis.set(cacheKey, token, "EX", this.config.access.expiryInSeconds);
 
     return token;
@@ -84,7 +93,7 @@ export class TokenUtil {
 
   /**
    * Signs a refresh token for a given user.
-   * @param {string} userId - The user's unique identifier
+   * @param {Object} keys - ids which used to generate keys
    * @param {Object} [payload={}] - Additional claims to include in the token
    * @returns {Promise<string>} A promise that resolves with the signed refresh token
    *
@@ -95,17 +104,18 @@ export class TokenUtil {
    * - issuer: from configuration
    * - audience: userId
    */
-  async signRefreshToken(userId, payload = {}) {
+  async signRefreshToken(keys = {}, payload = {}) {
     const options = {
       expiresIn: this.config.refresh.expiryInSeconds,
       issuer: this.config.issuer,
-      audience: userId
+      audience: keys?.userId
     };
 
-    const token = jwt.sign(payload, this.config.refresh.secret, options);
+    const encryptedPayload = this.encryptionUtil.encrypt(JSON.stringify(payload));
+    const token = jwt.sign({ data: encryptedPayload }, this.config.refresh.secret, options);
 
     // Cache the token
-    const cacheKey = this._getCacheKey("refresh", userId);
+    const cacheKey = this._getCacheKey("refresh", keys);
     await this.redis.set(cacheKey, token, "EX", this.config.refresh.expiryInSeconds);
 
     return token;
@@ -121,15 +131,19 @@ export class TokenUtil {
     try {
       const payload = jwt.verify(accessToken, this.config.access.secret);
 
+      // decrypt data
+      const encryptedString = this.encryptionUtil.decrypt(payload.data);
+      const data = JSON.parse(encryptedString);
+
       // Verify against cache
-      const cacheKey = this._getCacheKey("access", payload.aud);
+      const cacheKey = this._getCacheKey("access", data?.keys);
       const cachedToken = await this.redis.get(cacheKey);
 
       if (accessToken !== cachedToken) {
         throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid access token");
       }
 
-      return payload;
+      return data;
     } catch (error) {
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
@@ -148,15 +162,19 @@ export class TokenUtil {
     try {
       const payload = jwt.verify(refreshToken, this.config.refresh.secret);
 
+      // decrypt data
+      const encryptedString = this.encryptionUtil.decrypt(payload.data);
+      const data = JSON.parse(encryptedString);
+
       // Verify against cache
-      const cacheKey = this._getCacheKey("refresh", payload.aud);
+      const cacheKey = this._getCacheKey("refresh", data?.keys);
       const cachedToken = await this.redis.get(cacheKey);
 
       if (refreshToken !== cachedToken) {
         throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid refresh token");
       }
 
-      return payload;
+      return data;
     } catch (error) {
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
