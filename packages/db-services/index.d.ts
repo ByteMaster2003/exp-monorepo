@@ -1,3 +1,5 @@
+/// <reference path="./models/index.d.ts" />
+
 declare module "db-services" {
   import mongoose from "mongoose";
   import IORedis from "ioredis";

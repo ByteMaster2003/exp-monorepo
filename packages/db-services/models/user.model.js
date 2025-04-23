@@ -1,14 +1,17 @@
 import { Schema, model } from "mongoose";
 
+import { toJSON, paginate } from "../plugins/index.js";
+
 const userSchema = new Schema(
   {
-    userName: {
+    name: {
       type: String,
       require: true
     },
     email: {
       type: String,
-      require: true
+      require: true,
+      unique: true
     },
     isEmailVerified: {
       type: Boolean,
@@ -19,9 +22,22 @@ const userSchema = new Schema(
       type: Boolean,
       default: false
     },
-    password: String
+    password: String,
+    role: {
+      type: String,
+      enum: ["Admin", "User"],
+      default: "User"
+    },
+    picture: String,
+    authProviders: [],
+    apps: []
   },
   { timestamps: true }
 );
 
-export const UserModel = model("users", userSchema);
+userSchema.plugin(toJSON);
+userSchema.plugin(paginate);
+
+const UserModel = model("users", userSchema);
+
+export { UserModel, userSchema };

@@ -39,4 +39,6 @@ logSchema.index({
   level: 1
 });
 
-export const LogsModel = model("logs", logSchema);
+const LogsModel = model("logs", logSchema);
+
+export { LogsModel, logSchema };
