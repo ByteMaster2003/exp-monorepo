@@ -32,6 +32,6 @@ declare module "db-services/models" {
   export const UserModel: Model<IUser>;
   export const userSchema: Schema<IUser>;
 
-  export const LogModel: Model<ILog>;
+  export const LogsModel: Model<ILog>;
   export const logSchema: Schema<ILog>;
 }
