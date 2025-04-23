@@ -21,6 +21,7 @@ export const AuthCallback = () => {
 
       const state = searchParams.get("state");
       const storedState = sessionStorage.getItem("oauth_state");
+      sessionStorage.removeItem("oauth_state");
       if (state !== storedState) {
         setIsLoading(false);
         return setIsError("State mismatched! Potential CSRF Attack");
@@ -40,7 +41,6 @@ export const AuthCallback = () => {
 
       setIsError(null);
       setIsLoading(false);
-      console.log("DEBUG-8: callback response:", response);
     };
 
     getAndSaveTokens();
