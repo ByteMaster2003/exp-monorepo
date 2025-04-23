@@ -30,12 +30,10 @@ export const registerSchema = z
       }),
     confirmPassword: z.string().min(1, "Password is required")
   })
-  .refine(
-    (data) => {
-      if (data.password !== data.confirmPassword) return false;
-    },
-    { message: "Password didn't match", path: ["confirmPassword"] }
-  );
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Password didn't matched",
+    path: ["confirmPassword"]
+  });
 
 export const validateQuery = z.object({
   app: z.enum(["control-deck", "restify"], { message: "Invalid Client App!" }),

@@ -1,17 +1,20 @@
-/* eslint-disable no-console */
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Google as GoogleIcon, GitHub as GitHubIcon } from "@mui/icons-material";
 import { Box, Paper, Button, TextField, Divider, Typography } from "@mui/material";
+import { nanoid } from "nanoid";
+import { useSnackbar } from "notistack";
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 import { validatePayloadWithSchema } from "ui";
 import { BadRequest } from "ui/components";
+import { POST } from "ui/utils";
 
 import { loginSchema, registerSchema, validateQuery } from "../validations/auth.validation.js";
 
 export const Home = () => {
   const baseUrl = import.meta.env.VITE_BASE_URL;
+  const { enqueueSnackbar } = useSnackbar();
   const [searchParams] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
@@ -26,13 +29,43 @@ export const Home = () => {
     handleSubmit,
     reset,
     formState: { errors }
-  } = useForm({ resolver: zodResolver(isLogin ? loginSchema : registerSchema), mode: "all" });
+  } = useForm({
+    resolver: zodResolver(isLogin ? loginSchema : registerSchema),
+    mode: "all",
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: ""
+    }
+  });
+  const config = import.meta.env;
+  const clientCallback = {
+    "control-deck": `${config.VITE_CONTROL_DECK_BASE}/oauth/callback`,
+    restify: `${config.VITE_RESTIFY_BASE}/oauth/callback`
+  };
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     setIsSubmitting(true);
-    console.log(data);
+    const formState = nanoid();
+    const payload = {
+      app: query.app,
+      state: formState,
+      email: data.email,
+      password: data.password
+    };
+    if (!isLogin) payload.name = data.name;
+    const url = `${import.meta.env.VITE_BASE_URL}/auth/sign-${isLogin ? "in" : "up"}`;
+
+    const response = await POST(url, payload);
+    if (!response.success) {
+      enqueueSnackbar(response.message, { variant: "error" });
+    } else if (response?.state === formState) {
+      window.location.href = `${clientCallback[response.app]}?code=${response.code}&state=${query.state}`;
+    } else {
+      return enqueueSnackbar("Invalid session!", { variant: "error" });
+    }
     setIsSubmitting(false);
-    reset();
   };
 
   const toggleLoginForm = () => {
@@ -114,7 +147,7 @@ export const Home = () => {
       >
         {/* Header */}
         <Typography variant="h5" sx={{ fontWeight: 900, marginBottom: "1rem" }}>
-          {isLogin ? "Sign in to" : "Sign up to"} {apps[query.clientApp]}
+          {isLogin ? "Sign in to" : "Sign up to"} {apps[query.app]}
         </Typography>
 
         {/* List OAuth providers */}
