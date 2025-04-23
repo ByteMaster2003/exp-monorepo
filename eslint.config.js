@@ -19,6 +19,7 @@ const baseRules = {
   "no-console": ["warn"],
   "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
   "no-unused-expressions": ["error"],
+  "no-undef": "error",
   quotes: ["error", "double"],
   camelcase: ["error", { properties: "always", allow: ["required_error", "invalid_type_error"] }],
 
