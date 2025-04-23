@@ -103,6 +103,10 @@ export const Home = () => {
     window.location.href = `${baseUrl}/oauth/google/authorize?app=${query.app}&state=${query.state}`;
   };
 
+  const authorizeGitHub = async () => {
+    window.location.href = `${baseUrl}/oauth/github/authorize?app=${query.app}&state=${query.state}`;
+  };
+
   useEffect(() => {
     // Check if there is any error message
     const errorMessage = searchParams.get("error");
@@ -165,6 +169,7 @@ export const Home = () => {
           variant="outlined"
           startIcon={<GitHubIcon />}
           sx={{ textTransform: "none", fontWeight: 600 }}
+          onClick={authorizeGitHub}
         >
           Continue with GitHub
         </Button>

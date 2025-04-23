@@ -77,6 +77,7 @@ const googleCallback = async (req, res) => {
       user = await UserModel.create({
         name: userInfo.data.name,
         email: userInfo.data.email,
+        pictures: [userInfo.data.picture],
         picture: userInfo.data.picture,
         isEmailVerified: userInfo.data.email_verified,
         authProviders: ["google"],
@@ -86,7 +87,13 @@ const googleCallback = async (req, res) => {
       if (!user.authProviders.includes("google")) {
         user = await UserModel.findOneAndUpdate(
           { email: user.email },
-          { $push: { authProviders: "google" } }
+          {
+            $push: { authProviders: "google" },
+            $set: {
+              pictures: [...user?.pictures, userInfo.data.picture],
+              picture: userInfo.data.picture
+            }
+          }
         );
       }
       if (!user.apps.includes(stateData.app)) {
@@ -105,8 +112,103 @@ const googleCallback = async (req, res) => {
   }
 };
 
-const authorizeGitHub = catchAsync(async (_req, _res) => {});
-const githubCallback = catchAsync(async (_req, _res) => {});
+const authorizeGitHub = async (req, res) => {
+  const { app, state } = req.query;
+
+  try {
+    // Save the auth state
+    const stateId = nanoid();
+    const jsonString = JSON.stringify({ app, nonce: state, id: stateId });
+    await redisClient.setex(`github_oauth_state:${stateId}`, 600, jsonString);
+
+    const params = new URLSearchParams({
+      client_id: AppConfig.GITHUB.CLIENT_ID,
+      redirect_uri: oauthRedirects.github,
+      scope: "user",
+      state: jsonString
+    });
+
+    const url = `https://github.com/login/oauth/authorize?${params.toString()}`;
+    res.redirect(url);
+  } catch (error) {
+    Logger.error(`GET /github/authorize: ${error.stack}`);
+    res.redirect(`${permitra_error_redirect}?error=${error.message}`);
+  }
+};
+
+const githubCallback = async (req, res) => {
+  const { code, state } = req.query;
+
+  try {
+    const stateData = JSON.parse(state);
+
+    // verify state
+    const githubOauthStateKey = `github_oauth_state:${stateData.id}`;
+    const storedState = await redisClient.get(githubOauthStateKey);
+    if (!storedState) {
+      return res.redirect(`${permitra_error_redirect}&error=Expired Session!`);
+    } else {
+      await redisClient.del(githubOauthStateKey);
+    }
+
+    const tokenRes = await axios.post(
+      "https://github.com/login/oauth/access_token",
+      {
+        client_id: AppConfig.GITHUB.CLIENT_ID,
+        client_secret: AppConfig.GITHUB.SECRET_KEY,
+        code,
+        redirect_uri: oauthRedirects.github
+      },
+      {
+        headers: { Accept: "application/json" }
+      }
+    );
+
+    const userInfo = await axios.get("https://api.github.com/user", {
+      headers: { Authorization: `Bearer ${tokenRes.data.access_token}` }
+    });
+
+    let user = await UserModel.findOne({ email: userInfo.data.email });
+    if (!user) {
+      user = await UserModel.create({
+        githubUserName: userInfo.data.login,
+        name: userInfo.data.name,
+        email: userInfo.data.email,
+        pictures: [userInfo.data.avatar_url],
+        picture: userInfo.data.avatar_url,
+        isEmailVerified: true,
+        authProviders: ["github"],
+        apps: [stateData.app]
+      });
+    } else {
+      if (!user.authProviders.includes("github")) {
+        user = await UserModel.findOneAndUpdate(
+          { email: user.email },
+          {
+            $push: { authProviders: "github" },
+            $set: {
+              githubUserName: userInfo.data.login,
+              pictures: [...user?.pictures, userInfo.data.avatar_url],
+              picture: userInfo.data.avatar_url
+            }
+          }
+        );
+      }
+      if (!user.apps.includes(stateData.app)) {
+        user = await UserModel.findOneAndUpdate(
+          { email: user.email },
+          { $push: { apps: stateData.app } }
+        );
+      }
+    }
+
+    const authCode = await authService.generateAuthCode(user._id.toString(), stateData.app);
+    res.redirect(`${clientRedirects[stateData.app]}?code=${authCode}&state=${stateData.nonce}`);
+  } catch (error) {
+    Logger.error(`GET /github/authorize: ${error.stack}`);
+    res.redirect(`${permitra_error_redirect}?error=${error.message}`);
+  }
+};
 
 const exchangeTokenWithCode = catchAsync(async (req, res) => {
   const { app, code } = req.body;

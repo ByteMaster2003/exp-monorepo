@@ -8,6 +8,7 @@ const userSchema = new Schema(
       type: String,
       require: true
     },
+    githubUserName: String,
     email: {
       type: String,
       require: true,
@@ -27,6 +28,10 @@ const userSchema = new Schema(
       type: String,
       enum: ["Admin", "User"],
       default: "User"
+    },
+    pictures: {
+      type: [String],
+      default: []
     },
     picture: String,
     authProviders: {
