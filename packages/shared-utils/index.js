@@ -7,5 +7,6 @@ export { TokenUtil } from "./token.util.js";
 import hashUtil from "./hash.util.js";
 export { loadEnvs } from "./env.util.js";
 export { RateLimiter } from "./rate-limiter.js";
+export { validatePayloadWithSchema } from "../ui/utils/zod.util.js";
 
 export { hashUtil, httpStatus };

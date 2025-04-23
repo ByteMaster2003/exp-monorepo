@@ -126,7 +126,7 @@ export class TokenUtil {
       const cachedToken = await this.redis.get(cacheKey);
 
       if (accessToken !== cachedToken) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, httpStatus[httpStatus.UNAUTHORIZED]);
+        throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid access token");
       }
 
       return payload;
@@ -153,7 +153,7 @@ export class TokenUtil {
       const cachedToken = await this.redis.get(cacheKey);
 
       if (refreshToken !== cachedToken) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, httpStatus[httpStatus.UNAUTHORIZED]);
+        throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid refresh token");
       }
 
       return payload;
