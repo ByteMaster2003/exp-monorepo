@@ -19,6 +19,7 @@ const baseRules = {
   "no-console": ["warn"],
   "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
   "no-unused-expressions": ["error"],
+  "no-undef": "error",
   quotes: ["error", "double"],
   camelcase: ["error", { properties: "always", allow: ["required_error", "invalid_type_error"] }],
 
@@ -28,7 +29,7 @@ const baseRules = {
 
 const importRules = {
   // Critical: Prevent incorrect imports
-  "import/no-unresolved": "error",
+  "import/no-unresolved": ["error", { ignore: ["^(ui|shared-utils)/"] }],
   "import/no-commonjs": "error",
   "import/no-duplicates": "error",
   "import/named": "error",
@@ -100,10 +101,9 @@ const settings = {
   "import/resolver": {
     node: {
       extensions: [".js", ".jsx", ".mjs"],
-      moduleDirectory: ["node_modules", "src"]
+      moduleDirectory: ["node_modules", "packages"]
     }
-  },
-  "import/internal-regex": "^@monorepo/"
+  }
 };
 
 export default [

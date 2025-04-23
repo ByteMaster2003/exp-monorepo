@@ -133,12 +133,12 @@ class RedisTransport extends Transport {
         info.message
       ];
 
-      if (info.query) args.push("query", info.query);
-      if (info.params) args.push("params", info.params);
-      if (info.body) args.push("body", info.body);
+      if (info.query) args.push("query", JSON.stringify(info.query));
+      if (info.params) args.push("params", JSON.stringify(info.params));
+      if (info.body) args.push("body", JSON.stringify(info.body));
       if (info.stack) args.push("stack", info.stack);
-      if (info.metadata) args.push("metadata", info.metadata);
-      if (info.data) args.push("data", info.data);
+      if (info.metadata) args.push("metadata", JSON.stringify(info.metadata));
+      if (info.data) args.push("data", JSON.stringify(info.data));
 
       await this.redis.xadd(...args);
       callback();

@@ -9,7 +9,36 @@
     "servers/*",
     "clients/*"
   ],
+  "exports": {
+    "./component": "./packages/ui/components/index.jsx"
+  },
   "scripts": {
+    "w:cd:a": "yarn workspace control-deck add",
+    "w:cd:r": "yarn workspace control-deck remove",
+    "w:cd:dev": "yarn workspace control-deck run dev",
+    "w:pmu:a": "yarn workspace permitra-ui add",
+    "w:pmu:r": "yarn workspace permitra-ui remove",
+    "w:pmu:dev": "yarn workspace permitra-ui run dev",
+    "w:rest:a": "yarn workspace restify add",
+    "w:rest:r": "yarn workspace restify remove",
+    "w:rest:dev": "yarn workspace restify run dev",
+    "w:ls:a": "yarn workspace log-streamr add",
+    "w:ls:r": "yarn workspace log-streamr remove",
+    "w:ls:dev": "yarn workspace log-streamr run dev",
+    "w:pm:a": "yarn workspace permitra add",
+    "w:pm:r": "yarn workspace permitra remove",
+    "w:pm:dev": "yarn workspace permitra run dev",
+    "w:rsf:a": "yarn workspace restify-engine add",
+    "w:rsf:r": "yarn workspace restify-engine remove",
+    "w:rsf:dev": "yarn workspace restify-engine run dev",
+    "w:cl:a": "yarn workspace custom-logger add",
+    "w:cl:r": "yarn workspace custom-logger remove",
+    "w:dbs:a": "yarn workspace db-services add",
+    "w:dbs:r": "yarn workspace db-services remove",
+    "w:sdu:a": "yarn workspace shared-utils add",
+    "w:sdu:r": "yarn workspace shared-utils remove",
+    "w:ui:a": "yarn workspace ui add",
+    "w:ui:r": "yarn workspace ui remove",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -47,6 +76,7 @@
     "globals": "^16.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
+    "nodemon": "^3.1.9",
     "prettier": "^3.5.3"
   }
 }

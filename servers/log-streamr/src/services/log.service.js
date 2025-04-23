@@ -1,4 +1,4 @@
-import { LogsModel } from "db-services/models/index.js";
+import { LogsModel } from "db-services/models";
 
 const createLog = async (data) => {
   let logs;

@@ -1,12 +1,13 @@
 import { ApiError, catchAsync, httpStatus } from "shared-utils";
 
+import { Logger } from "../config/index.js";
 import { tokenUtil, redisClient } from "../utils/index.js";
 
 export const authMiddleware = catchAsync(async (req, _, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "") || req.cookies.accessToken;
 
   if (!token) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
+    throw new ApiError(httpStatus.UNAUTHORIZED, httpStatus[httpStatus.UNAUTHORIZED]);
   }
 
   const payload = await tokenUtil.verifyAccessToken(token);
@@ -27,7 +28,7 @@ export const authSocketSession = async (socket, next) => {
 
   // Verify the sessionToken
   try {
-    const payload = await tokenService.verifySessionToken(sessionToken);
+    const payload = await tokenUtil.verifySessionToken(sessionToken);
     if (!payload) {
       return next(new Error("Authentication error: Invalid token"));
     }

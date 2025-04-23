@@ -5,7 +5,22 @@
   "license": "MIT",
   "private": true,
   "type": "module",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./middlewares": {
+      "types": "./middlewares/index.d.ts",
+      "import": "./middlewares/index.js"
+    }
+  },
   "dependencies": {
-    "jsonwebtoken": "^9.0.2"
+    "dotenv": "^16.5.0",
+    "express-rate-limit": "^7.5.0",
+    "http-status": "^2.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.24.3"
   }
 }

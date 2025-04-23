@@ -1,0 +1,39 @@
+{
+  "name": "ui",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./components": {
+      "types": "./components/index.d.ts",
+      "import": "./components/index.jsx"
+    },
+    "./contexts": {
+      "types": "./contexts/index.d.ts",
+      "import": "./contexts/index.js"
+    },
+    "./hooks": {
+      "types": "./hooks/index.d.ts",
+      "import": "./hooks/index.js"
+    },
+    "./providers": {
+      "types": "./providers/index.d.ts",
+      "import": "./providers/index.jsx"
+    },
+    "./utils": {
+      "types": "./utils/index.d.ts",
+      "import": "./utils/index.js"
+    }
+  },
+  "dependencies": {
+    "@mui/material": "^7.0.2",
+    "axios": "^1.8.4",
+    "react": "^19.1.0"
+  }
+}

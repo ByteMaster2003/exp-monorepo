@@ -27,31 +27,23 @@ const generateSHA256Hash = (inputString) => {
 };
 
 /**
- * Generates a 6-digit OTP using user ID and current timestamp
- * @param {string|number} userId - The user identifier
- * @returns {Promise<string>} A 6-digit OTP string padded with zeros if necessary
+ * Generates a 6-character base32 OTP
+ * @returns {string} A formatted 6-character base32 string (e.g., 'T6Z-2KP')
  *
  * @example
- * const otp = await generateOTP('user123');
- * console.log(otp); // outputs something like '123456'
+ * const otp = await generateOTP();
+ * console.log(otp); // outputs something like 'T6Z-2KP'
  */
-const generateOTP = async (userId) => {
-  const randomBytes = crypto.randomBytes(3);
-  const timestamp = Date.now();
-  const bufferData = Buffer.concat([
-    randomBytes,
-    Buffer.from(userId.toString()),
-    Buffer.from(timestamp.toString())
-  ]);
+const generateOTP = () => {
+  const base32Chars = "234567ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const bytes = crypto.randomBytes(6); // 6 bytes = 48 bits
 
-  const hash = crypto.createHash("sha256");
-  const combinedHash = hash.update(bufferData);
-  const finalHash = combinedHash.digest("hex");
+  let otp = "";
+  for (let i = 0; i < 6; i++) {
+    otp += base32Chars[bytes[i] % 32];
+  }
 
-  const OTP = parseInt(finalHash, 16) % 1000000;
-  const OTPString = OTP.toString().padEnd(6, "0");
-
-  return OTPString;
+  return otp;
 };
 
 export default {
