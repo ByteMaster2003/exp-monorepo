@@ -9,7 +9,9 @@ const listOfVariables = [
   "REDIS_SOCKET_LOG_STREAM",
   "WORKER_BATCH_SIZE",
   "ACCESS_TOKEN_SECRET",
-  "REFRESH_TOKEN_SECRET"
+  "REFRESH_TOKEN_SECRET",
+  "ENCRYPTION_KEY",
+  "ENCRYPTION_IV"
 ];
 
 const schemaObject = {
