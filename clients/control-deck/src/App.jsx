@@ -5,6 +5,7 @@ import { Admin } from "./pages/admin.jsx";
 import { AuthCallback } from "./pages/callback.jsx";
 import { Home } from "./pages/home.jsx";
 import { Login } from "./pages/login.jsx";
+import { Logs } from "./pages/logs.jsx";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
 
         <Route element={<RoleProtectedRoutes allowedRoles="Admin,User" />}>
           <Route path="/admin" element={<Admin />} />
+          <Route path="/logs" element={<Logs />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

@@ -1,6 +1,6 @@
 import { NavigationBar } from "../components/navbar.jsx";
 
-export const Home = () => {
+export const Logs = () => {
   return (
     <>
       <NavigationBar />
