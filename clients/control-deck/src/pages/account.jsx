@@ -2,11 +2,11 @@ import { Typography } from "@mui/material";
 
 import { NavigationBar } from "../components/navbar.jsx";
 
-export const Home = () => {
+export const Account = () => {
   return (
     <>
       <NavigationBar />
-      <Typography> Welcom to Home </Typography>
+      <Typography>Hi Mr User, this is going to be you account page.</Typography>
     </>
   );
 };
