@@ -58,7 +58,7 @@ const processLogStream = async ({ streamName, batchSize = 100 }) => {
         await logQueue.add("process-log", logData);
 
         // Broadcast to connected sockets
-        SocketIO?.emit("new-log", logData);
+        SocketIO.emit("new-log", logData);
 
         // Delete message
         await redisClient.xdel(streamName, messageId);

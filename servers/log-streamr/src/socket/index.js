@@ -4,9 +4,10 @@ import { Logger } from "../config/index.js";
 import { authSocketSession } from "../middlewares/index.js";
 
 /** @type {import('socket.io').Server} */
-let io;
+// eslint-disable-next-line import/no-mutable-exports
+export let SocketIO;
 export const initializeSocket = (server) => {
-  io = new Server(server, {
+  SocketIO = new Server(server, {
     cors: {
       origin: "http://localhost:5000",
       methods: ["GET", "POST"],
@@ -15,10 +16,10 @@ export const initializeSocket = (server) => {
   });
 
   // Authenticate user
-  io.use(authSocketSession);
+  SocketIO.use(authSocketSession);
 
   // Connection event
-  io.on("connection", (socket) => {
+  SocketIO.on("connection", (socket) => {
     const userId = socket.user.id;
     Logger.info({ message: `User connected: ${userId}` });
 
@@ -40,7 +41,5 @@ export const initializeSocket = (server) => {
   });
 
   Logger.info({ message: "Socket server initialized" });
-  return io;
+  return SocketIO;
 };
-
-export const SocketIO = io;

@@ -3,7 +3,7 @@ import { ApiError, catchAsync, httpStatus } from "shared-utils";
 import { Logger } from "../config/index.js";
 import { tokenUtil, redisClient } from "../utils/index.js";
 
-export const authMiddleware = catchAsync(async (req, _, next) => {
+export const verifyAccess = catchAsync(async (req, _, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "") || req.cookies.accessToken;
 
   if (!token) {
