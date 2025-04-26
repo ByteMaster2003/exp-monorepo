@@ -5,6 +5,8 @@ import { BadRequest, LoaderComponent } from "ui/components";
 import { useAuth } from "ui/hooks";
 import { POST } from "ui/utils";
 
+import { AppConfig } from "../config.js";
+
 export const AuthCallback = () => {
   const { setUser, setAccessToken, setIsAuthenticated } = useAuth();
   const [searchParams] = useSearchParams();
@@ -32,7 +34,7 @@ export const AuthCallback = () => {
         code: authCode
       };
 
-      const response = await POST(import.meta.env.VITE_PERMITRA_EXCHANGE_URI, payload);
+      const response = await POST(AppConfig.AUTH.EXCHANGE_URI, payload);
       if (!response.success) {
         return setIsError(response.message);
       }
